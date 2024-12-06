@@ -1,0 +1,55 @@
+{% extends 'layout.html' %} {% block header %}
+<h1>{% block title %}Maintenance Mode{% endblock %}</h1>
+
+{% endblock %} {% block nav%}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Maintenance</li>
+{% endblock %} {% block content %}
+
+<p>
+  Use the buttons below to test each watering line by toggling it on or off.
+</p>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>GPIO Pin</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in watering_lines %}
+    <tr>
+      <td>{{ line.id }}</td>
+      <td>{{ line.name }}</td>
+      <td>{{ line.gpio_pin }}</td>
+      <td>
+        <form method="POST" style="display: inline">
+          <input type="hidden" name="line_id" value="{{ line.id }}" />
+          <button
+            type="submit"
+            name="action"
+            value="on"
+            class="btn btn-success"
+          >
+            Turn On
+          </button>
+        </form>
+        <form method="POST" style="display: inline">
+          <input type="hidden" name="line_id" value="{{ line.id }}" />
+          <button
+            type="submit"
+            name="action"
+            value="off"
+            class="btn btn-danger"
+          >
+            Turn Off
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

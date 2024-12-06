@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+      }
+    </style>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+  </head>
+  <body>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        {% block nav%}{% endblock %}
+      </ol>
+    </nav>
+    <header>{% block header %}{% endblock %}</header>
+    <div class="container mt-5" id="content">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>
