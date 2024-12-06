@@ -1,0 +1,31 @@
+{% extends 'layout.html' %} {% block header %}
+<h1>{% block title %}Edit Watering Line{% endblock %}</h1>
+{% endblock %} {% block nav%}
+
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="/lines">lines</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit</li>
+
+{% endblock %} {% block content %}
+<form method="POST">
+  <label for="name">Watering Line Name:</label>
+  <input
+    type="text"
+    id="name"
+    name="name"
+    value="{{ line.name }}"
+    required
+  /><br /><br />
+
+  <label for="gpio_pin">GPIO Pin Number:</label>
+  <input
+    type="number"
+    id="gpio_pin"
+    name="gpio_pin"
+    value="{{ line.gpio_pin }}"
+    required
+  /><br /><br />
+
+  <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+{% endblock %}

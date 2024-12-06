@@ -1,0 +1,52 @@
+{% extends 'layout.html' %} {% block header %}
+<h1>{% block title %}Edit Watering Schedule{% endblock %}</h1>
+{% endblock %} {% block nav%}
+<li class="breadcrumb-item"><a href="/">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('list_schedules')}}">Schedule</a></li>
+<li class="breadcrumb-item active" aria-current="page">Edit</li>
+{% endblock %} {% block content %}
+    <form method="POST">
+      <label for="watering_line_id">Watering Line:</label>
+      <select id="watering_line_id" name="watering_line_id">
+        {% for line in watering_lines %}
+        <option value="{{ line.id }}" {% if line.id == schedule.watering_line_id %}selected{% endif %}>
+          {{ line.name }}
+        </option>
+        {% endfor %}
+      </select><br /><br />
+
+      <label for="start_time">Start Time:</label>
+      <input
+        type="time"
+        id="start_time"
+        name="start_time"
+        value="{{ schedule.start_time }}"
+        required
+      /><br /><br />
+
+      <label for="end_time">End Time:</label>
+      <input
+        type="time"
+        id="end_time"
+        name="end_time"
+        value="{{ schedule.end_time }}"
+        required
+      /><br /><br />
+
+      <label>Repeat Days:</label><br />
+      {% for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] %}
+      <input
+        type="checkbox"
+        id="{{ day }}"
+        name="repeat_days"
+        value="{{ day }}"
+        {% if day in schedule.repeat_days.split(',') %}checked{% endif %}
+      />
+      <label for="{{ day }}">{{ day }}</label><br />
+      {% endfor %}
+      <br />
+
+      <button type="submit" class="btn btn-primary">Update Schedule</button>
+    </form>
+    <a href="{{ url_for('list_schedules') }}">Cancel</a>
+{% endblock %}

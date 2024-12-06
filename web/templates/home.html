@@ -1,0 +1,33 @@
+{% extends 'layout.html' %} {% block header %}
+<h1>
+  Welcome to the {% block title %} Watering System {% endblock %} Controller
+</h1>
+{% endblock %} {% block nav%}
+
+<li class="breadcrumb-item active" aria-current="page">Home</li>
+{% endblock %} {% block content %}
+<p>Use the links below to manage your watering system:</p>
+
+<a href="{{ url_for('list_lines') }}">
+  <button type="button" class="btn btn-primary btn-lg btn-block">
+    Manage Watering Lines
+  </button>
+</a>
+<br/>
+
+<a href="{{ url_for('list_schedules') }}">
+  <button type="button" class="btn btn-success btn-lg btn-block">
+    Manage Schedules
+  </button>
+</a>
+<br/>
+
+<a href="{{ url_for('maintenance') }}">
+<button type="button" class="btn btn-warning btn-lg btn-block">
+  Maintenance Mode
+</button>
+</a>
+<br/>
+
+
+{% endblock %}
