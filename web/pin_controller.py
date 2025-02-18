@@ -21,6 +21,11 @@ else:
     active_pin_state = GPIO.LOW
 
 
+def enable_all_lines():
+    for pin in PINLIST:
+        enable_line(pin)
+
+
 def enable_line(pin: int):
     if pin not in PINLIST:
         print(f"Error can't enable pin {pin} not in the pin list")

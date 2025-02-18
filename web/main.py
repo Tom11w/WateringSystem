@@ -5,7 +5,7 @@ import schedule
 import time
 import datetime
 import threading
-from dummy_pin_controller import enable_line, activate_line, deactivate_line
+from dummy_pin_controller import enable_all_lines, activate_line, deactivate_line
 
 
 logging.basicConfig(level=logging.INFO)
@@ -93,7 +93,6 @@ def start_watering(gpio_pin=-1, name="No Name"):
     if maintenance_check():
         print(f"Maintenance mode is active. Skipping watering starting for {name}, (PIN {gpio_pin}).")
         return
-    enable_line(gpio_pin)
     activate_line(gpio_pin)
     print(f"{datetime.datetime.now()} - Watering started for {name}, (PIN {gpio_pin})")
 
@@ -102,7 +101,6 @@ def stop_watering(gpio_pin=-1, name="No Name"):
     if maintenance_check():
         print(f"Maintenance mode is active. Skipping watering endding for {name}, (PIN {gpio_pin}).")
         return
-    enable_line(gpio_pin)
     deactivate_line(gpio_pin)
     print(f"{datetime.datetime.now()} - Watering stopped for {name}, (PIN {gpio_pin})")
 
@@ -343,7 +341,6 @@ def maintenance():
 
         if line:
             gpio_pin = line["gpio_pin"]
-            enable_line(gpio_pin)
 
             if action == "on":
                 activate_line(gpio_pin)  # Turn the line on
@@ -373,6 +370,9 @@ def maintenance_check():
 
 
 if __name__ == "__main__":
+    # initlise all pins as outputs in a inactive state.
+    enable_all_lines()
+
     # Start the scheduler on a background thread
     load_schedules()
     threading.Thread(target=run_schedule, daemon=True).start()
