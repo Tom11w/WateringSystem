@@ -1,7 +1,22 @@
 import sqlite3
+import datetime
+import calendar
 
 # Path to your SQLite database file
 DATABASE = "watering_system.db"
+
+
+def get_now_time():
+    return datetime.datetime.now().strftime('%H:%M')
+
+
+def get_today_str():
+    return calendar.day_abbr[datetime.datetime.now().weekday()]
+
+
+def run_now(start_time, end_time):
+    current_time = get_now_time()
+    return sorted([start_time, current_time, end_time])[1] == current_time
 
 
 def dict_factory(cursor, row):

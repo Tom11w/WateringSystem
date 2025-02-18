@@ -5,7 +5,11 @@
 <li class="breadcrumb-item"><a href="/">Home</a></li>
 <li class="breadcrumb-item active" aria-current="page">Maintenance</li>
 {% endblock %} {% block content %}
-
+<form action="/maintenance/toggle_maintenance" method="POST">
+    <button type="submit" class="btn btn-danger">
+        Toggle Maintenance Mode (Currently: {{ mode }})
+    </button>
+</form>
 <p>
   Use the buttons below to test each watering line by toggling it on or off.
 </p>
