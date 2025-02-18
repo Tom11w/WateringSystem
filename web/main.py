@@ -5,6 +5,7 @@ import schedule
 import time
 import datetime
 import threading
+from dummy_pin_controller import enable_line, activate_line, deactivate_line
 
 
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +16,7 @@ app = Flask(__name__)
 def run_schedule():
     while True:
         schedule.run_pending()
-        time.sleep(60)  # Check every minute
+        time.sleep(1)  # Check every second
 
 
 def load_schedules():
@@ -90,19 +91,19 @@ def load_schedules():
 
 def start_watering(gpio_pin=-1, name="No Name"):
     if maintenance_check():
-        print("Maintenance mode is active. Skipping watering starting.")
+        print(f"Maintenance mode is active. Skipping watering starting for {name}, (PIN {gpio_pin}).")
         return
-    # GPIO.setup(schedule_item["gpio_pin"], GPIO.OUT)
-    # GPIO.output(schedule_item["gpio_pin"], GPIO.HIGH)
+    enable_line(gpio_pin)
+    activate_line(gpio_pin)
     print(f"{datetime.datetime.now()} - Watering started for {name}, (PIN {gpio_pin})")
 
 
 def stop_watering(gpio_pin=-1, name="No Name"):
     if maintenance_check():
-        print("Maintenance mode is active. Skipping watering endding.")
+        print(f"Maintenance mode is active. Skipping watering endding for {name}, (PIN {gpio_pin}).")
         return
-    # GPIO.setup(schedule_item["gpio_pin"], GPIO.OUT)
-    # GPIO.output(schedule_item["gpio_pin"], GPIO.LOW)
+    enable_line(gpio_pin)
+    deactivate_line(gpio_pin)
     print(f"{datetime.datetime.now()} - Watering stopped for {name}, (PIN {gpio_pin})")
 
 
@@ -340,14 +341,14 @@ def maintenance():
         # Get the GPIO pin for the selected watering line
         line = next((line for line in watering_lines if line["id"] == line_id), None)
 
-        # if line:
-        #     gpio_pin = line["gpio_pin"]
-        #     GPIO.setup(gpio_pin, GPIO.OUT)
+        if line:
+            gpio_pin = line["gpio_pin"]
+            enable_line(gpio_pin)
 
-        #     if action == "on":
-        #         GPIO.output(gpio_pin, GPIO.HIGH)  # Turn the line on
-        #     elif action == "off":
-        #         GPIO.output(gpio_pin, GPIO.LOW)  # Turn the line off
+            if action == "on":
+                activate_line(gpio_pin)  # Turn the line on
+            elif action == "off":
+                deactivate_line(gpio_pin)  # Turn the line off
 
     return render_template(
         "maintenance.html",
