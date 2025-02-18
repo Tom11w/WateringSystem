@@ -36,6 +36,9 @@
             name="action"
             value="on"
             class="btn btn-success"
+            {% if mode == "off" %}
+            disabled
+            {% endif %}
           >
             Turn On
           </button>
@@ -47,6 +50,10 @@
             name="action"
             value="off"
             class="btn btn-danger"
+
+            {% if mode == "off" %}
+            disabled
+            {% endif %}
           >
             Turn Off
           </button>
