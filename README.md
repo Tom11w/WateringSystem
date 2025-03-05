@@ -4,8 +4,7 @@
 
 ## Todo
 
-- move service file
-- Create virtual Env and requirement.txt for python maybe
+- Set Up nginx as reverse proxy for http and https
 
 ## Set Flask App to Start on Boot
 
@@ -20,9 +19,23 @@ sudo systemctl enable watering_system
 sudo systemctl start watering_system
 ```
 
+### Monitor logs live
+
+```sh
+journalctl -f -u watering_system.service
+```
+
+### Get Service Status
+
+```sh
+systemctl status watering_system.service
+```
+
 ## Creating a virtual env
 
+```sh
 python3 -m venv .venv
+```
 
 ### Activating virtual enviroment and install requirement
 
