@@ -151,6 +151,7 @@ def list_schedules():
         SELECT s.id, w.name AS watering_line, s.start_time, s.end_time, s.repeat_days
         FROM watering_schedule s
         JOIN watering_lines w ON s.watering_line_id = w.id
+        ORDER By s.start_time
         ''').fetchall()
     return render_template("list_schedules.html", schedules=schedules)
 
