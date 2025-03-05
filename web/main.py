@@ -5,7 +5,7 @@ import schedule
 import time
 import datetime
 import threading
-from dummy_pin_controller import enable_all_lines, activate_line, deactivate_line
+from pin_controller import enable_all_lines, activate_line, deactivate_line
 
 
 logging.basicConfig(level=logging.INFO)
