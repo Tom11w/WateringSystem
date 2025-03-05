@@ -26,6 +26,19 @@ def create_db():
         FOREIGN KEY (watering_line_id) REFERENCES watering_lines (id) ON DELETE CASCADE
     )
     """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+    )
+    """)
+
+    # Initialize maintenance_mode if not present
+    cursor.execute("""
+    INSERT OR IGNORE INTO settings ( key, value)
+    VALUES ('maintenance_mode', 'off')
+    """)
+
 
 #   id:
 #       A unique identifier for each schedule.

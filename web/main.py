@@ -1,10 +1,113 @@
 from flask import Flask, render_template, redirect, request, url_for
 from utils import SQLite
 import logging
+import schedule
+import time
+import datetime
+import threading
+from dummy_pin_controller import enable_all_lines, activate_line, deactivate_line
+
 
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
+
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)  # Check every second
+
+
+def load_schedules():
+    with SQLite() as db:
+        schedules = db.execute(
+            '''
+            SELECT wl.gpio_pin, wl.name, ws.repeat_days, ws.start_time, ws.end_time
+            FROM watering_schedule ws
+            INNER JOIN watering_lines wl ON ws.watering_line_id = wl.id
+        ''').fetchall()
+
+    # Convert each schedule into jobs
+    for schedule_item in schedules:
+        gpio_pin = schedule_item['gpio_pin']
+        name = schedule_item['name']
+        days = schedule_item['repeat_days'].split(',')
+        start_time = schedule_item['start_time']
+        end_time = schedule_item['end_time']
+
+        # Schedule the start and stop for each day
+        if "Mon" in days:
+            schedule.every().monday.at(start_time).do(start_watering,
+                                                      gpio_pin=gpio_pin,
+                                                      name=name)
+            schedule.every().monday.at(end_time).do(stop_watering,
+                                                    gpio_pin=gpio_pin,
+                                                    name=name)
+        if "Tue" in days:
+            schedule.every().tuesday.at(start_time).do(start_watering,
+                                                       gpio_pin=gpio_pin,
+                                                       name=name)
+            schedule.every().tuesday.at(end_time).do(stop_watering,
+                                                     gpio_pin=gpio_pin,
+                                                     name=name)
+        if "Wed" in days:
+            schedule.every().wednesday.at(start_time).do(start_watering,
+                                                         gpio_pin=gpio_pin,
+                                                         name=name)
+            schedule.every().wednesday.at(end_time).do(stop_watering,
+                                                       gpio_pin=gpio_pin,
+                                                       name=name)
+        if "Thu" in days:
+            schedule.every().thursday.at(start_time).do(start_watering,
+                                                        gpio_pin=gpio_pin,
+                                                        name=name)
+            schedule.every().thursday.at(end_time).do(stop_watering,
+                                                      gpio_pin=gpio_pin,
+                                                      name=name)
+        if "Fri" in days:
+            schedule.every().friday.at(start_time).do(start_watering,
+                                                      gpio_pin=gpio_pin,
+                                                      name=name)
+            schedule.every().friday.at(end_time).do(stop_watering,
+                                                    gpio_pin=gpio_pin,
+                                                    name=name)
+        if "Sat" in days:
+            schedule.every().saturday.at(start_time).do(start_watering,
+                                                        gpio_pin=gpio_pin,
+                                                        name=name)
+            schedule.every().saturday.at(end_time).do(stop_watering,
+                                                      gpio_pin=gpio_pin,
+                                                      name=name)
+        if "Sun" in days:
+            schedule.every().sunday.at(start_time).do(start_watering,
+                                                      gpio_pin=gpio_pin,
+                                                      name=name)
+            schedule.every().sunday.at(end_time).do(stop_watering,
+                                                    gpio_pin=gpio_pin,
+                                                    name=name)
+    print(f"Loaded {len(schedules)} watering schedules.")
+
+
+def start_watering(gpio_pin=-1, name="No Name"):
+    if maintenance_check():
+        print(f"Maintenance mode is active. Skipping watering starting for {name}, (PIN {gpio_pin}).")
+        return
+    activate_line(gpio_pin)
+    print(f"{datetime.datetime.now()} - Watering started for {name}, (PIN {gpio_pin})")
+
+
+def stop_watering(gpio_pin=-1, name="No Name"):
+    if maintenance_check():
+        print(f"Maintenance mode is active. Skipping watering endding for {name}, (PIN {gpio_pin}).")
+        return
+    deactivate_line(gpio_pin)
+    print(f"{datetime.datetime.now()} - Watering stopped for {name}, (PIN {gpio_pin})")
+
+
+def reload_schedules():
+    schedule.clear()  # Clear existing jobs
+    load_schedules()  # Reload from the database
 
 
 def add_schedule(watering_line_id, start_time, end_time, repeat_days):
@@ -31,6 +134,7 @@ def add_schedule(watering_line_id, start_time, end_time, repeat_days):
         INSERT INTO watering_schedule (watering_line_id, start_time, end_time, repeat_days)
         VALUES (?, ?, ?, ?)
         ''', (watering_line_id, start_time, end_time, repeat_days))
+    reload_schedules()  # Reload schedules to reflect the change
 
 
 @app.route("/")
@@ -117,6 +221,8 @@ def edit_schedule(schedule_id):
         SET watering_line_id = ?, start_time = ?, end_time = ?, repeat_days = ?
         WHERE id = ?
         ''', (watering_line_id, start_time, end_time, repeat_days, schedule_id))
+
+    reload_schedules()  # Reload schedules to reflect the change
     return redirect(url_for("list_schedules"))
 
 
@@ -125,6 +231,7 @@ def delete_schedule(schedule_id):
     """Delete a watering schedule."""
     with SQLite() as db:
         db.execute("DELETE FROM watering_schedule WHERE id = ?", (schedule_id,))
+    reload_schedules()  # Reload schedules to reflect the change
     return redirect(url_for("list_schedules"))
 
 
@@ -223,7 +330,7 @@ def maintenance():
     """Page to test and toggle watering lines."""
     with SQLite() as db:
         watering_lines = db.execute("SELECT * FROM watering_lines").fetchall()
-
+        mode = db.execute("SELECT value FROM settings WHERE key = 'maintenance_mode'").fetchone()["value"]
     if request.method == "POST":
         # Handle toggling
         line_id = int(request.form["line_id"])
@@ -232,17 +339,43 @@ def maintenance():
         # Get the GPIO pin for the selected watering line
         line = next((line for line in watering_lines if line["id"] == line_id), None)
 
-        # if line:
-        #     gpio_pin = line["gpio_pin"]
-        #     GPIO.setup(gpio_pin, GPIO.OUT)
+        if line:
+            gpio_pin = line["gpio_pin"]
 
-        #     if action == "on":
-        #         GPIO.output(gpio_pin, GPIO.HIGH)  # Turn the line on
-        #     elif action == "off":
-        #         GPIO.output(gpio_pin, GPIO.LOW)  # Turn the line off
+            if action == "on":
+                activate_line(gpio_pin)  # Turn the line on
+            elif action == "off":
+                deactivate_line(gpio_pin)  # Turn the line off
 
-    return render_template("maintenance.html", watering_lines=watering_lines)
+    return render_template(
+        "maintenance.html",
+        watering_lines=watering_lines,
+        mode=mode
+    )
+
+
+@app.route("/maintenance/toggle_maintenance", methods=["POST"])
+def toggle_maintenance():
+    with SQLite() as db:
+        mode = db.execute("SELECT value FROM settings WHERE key = 'maintenance_mode'").fetchone()["value"]
+        new_mode = "on" if mode == "off" else "off"
+        db.execute("UPDATE settings SET value = ? WHERE key = 'maintenance_mode'", (new_mode,))
+    return redirect(url_for("maintenance"))
+
+
+def maintenance_check():
+    with SQLite() as db:
+        maintenance = db.execute("SELECT value FROM settings WHERE key = 'maintenance_mode'").fetchone()["value"]
+    return maintenance == "on"
 
 
 if __name__ == "__main__":
+    # initlise all pins as outputs in a inactive state.
+    enable_all_lines()
+
+    # Start the scheduler on a background thread
+    load_schedules()
+    threading.Thread(target=run_schedule, daemon=True).start()
+
+    # start webserver
     app.run(debug=False, host="0.0.0.0")
