@@ -1,6 +1,6 @@
 # WateringSystem
 
-[Watering system page](http://raspberrypi4b.local/LEDselect.php)
+[Watering system page](http://hub.local:5000)
 
 ## Todo
 
