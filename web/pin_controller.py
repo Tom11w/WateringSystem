@@ -26,6 +26,11 @@ def enable_all_lines():
         enable_line(pin)
 
 
+def deactivate_all_lines():
+    for every_pin in PINLIST:
+        deactivate_line(every_pin)
+
+
 def enable_line(pin: int):
     if pin not in PINLIST:
         print(f"Error can't enable pin {pin} not in the pin list")
@@ -39,8 +44,7 @@ def activate_line(pin: int):
     if pin not in PINLIST:
         print(f"Error can't activate pin {pin}. not in the pin list")
         return
-    for every_pin in PINLIST:
-        deactivate_line(every_pin)
+    deactivate_all_lines()
     GPIO.output(pin, active_pin_state)  # Turn on
     if debug:
         print(f"GPIO pin {pin} set line active")

@@ -5,7 +5,7 @@ import schedule
 import time
 import datetime
 import threading
-from pin_controller import enable_all_lines, activate_line, deactivate_line
+from pin_controller import enable_all_lines, activate_line, deactivate_line, deactivate_all_lines
 
 
 logging.basicConfig(level=logging.INFO)
@@ -360,6 +360,7 @@ def toggle_maintenance():
         mode = db.execute("SELECT value FROM settings WHERE key = 'maintenance_mode'").fetchone()["value"]
         new_mode = "on" if mode == "off" else "off"
         db.execute("UPDATE settings SET value = ? WHERE key = 'maintenance_mode'", (new_mode,))
+    deactivate_all_lines()
     return redirect(url_for("maintenance"))
 
 
