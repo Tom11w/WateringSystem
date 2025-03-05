@@ -5,7 +5,7 @@ After=network.target
 [Service]
 
 ExecStart=/home/admin/wateringsystem/.venv/bin/python /home/admin/wateringsystem/web/main.py
-WorkingDirectory=/home/wateringsystem/web
+WorkingDirectory=/home/admin/wateringsystem/web
 User=admin
 Restart=always
 Environment="PYTHONUNBUFFERED=1"
