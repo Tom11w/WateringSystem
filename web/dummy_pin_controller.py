@@ -18,6 +18,11 @@ def enable_all_lines():
         enable_line(pin)
 
 
+def deactivate_all_lines():
+    for every_pin in PINLIST:
+        deactivate_line(every_pin)
+
+
 def enable_line(pin: int):
     if pin not in PINLIST:
         print(f"Error can't enable pin {pin} not in the pin list")
